@@ -8,11 +8,12 @@ import {
   Delete,
   Query,
   ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { SimpleUser } from './interfaces/simple-user.interface';
+import { PublicUser } from './interfaces/public-user.interface';
 
 @Controller('users')
 export class UsersController {
@@ -25,8 +26,8 @@ export class UsersController {
 
   @Get()
   findAll(
-    @Query('page', ParseIntPipe) page = 1,
-    @Query('limit', ParseIntPipe) limit = 10,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
     return this.usersService.paginate({
       page,
@@ -35,7 +36,7 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findById(@Param('id') id: string): Promise<SimpleUser> {
+  async findById(@Param('id') id: string): Promise<PublicUser> {
     return this.usersService.findById(+id);
   }
 

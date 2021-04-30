@@ -8,7 +8,7 @@ import { hash } from 'bcrypt';
 import { PrismaService } from 'src/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { SimpleUser } from './interfaces/simple-user.interface';
+import { PublicUser } from './interfaces/public-user.interface';
 
 @Injectable()
 export class UsersService {
@@ -44,7 +44,7 @@ export class UsersService {
   }: {
     page?: number;
     limit?: number;
-  } = {}): Promise<SimpleUser[]> {
+  } = {}): Promise<PublicUser[]> {
     return this.prisma.user.findMany({
       skip: (page - 1) * limit,
       take: limit,
@@ -52,10 +52,13 @@ export class UsersService {
         id: true,
         name: true,
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
   }
 
-  async findById(id: number): Promise<SimpleUser> {
+  async findById(id: number): Promise<PublicUser> {
     const user = await this.prisma.user.findUnique({
       where: {
         id,

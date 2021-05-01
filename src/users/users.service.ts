@@ -8,6 +8,7 @@ import { hash } from 'bcrypt';
 import { PrismaService } from '../prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PrivateUser } from './interfaces/private-user.interface';
 import { PublicUser } from './interfaces/public-user.interface';
 
 @Injectable()
@@ -75,12 +76,16 @@ export class UsersService {
     return user;
   }
 
-  async findByEmail(email: string): Promise<User | null> {
-    return this.prisma.user.findUnique({
+  async findByEmail(email: string): Promise<User> {
+    const user = await this.prisma.user.findUnique({
       where: {
         email,
       },
     });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
@@ -123,5 +128,20 @@ export class UsersService {
         id,
       },
     });
+  }
+
+  async findPrivateUser(id: number): Promise<PrivateUser> {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+      },
+    });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }

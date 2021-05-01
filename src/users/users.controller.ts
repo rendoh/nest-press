@@ -9,11 +9,16 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PublicUser } from './interfaces/public-user.interface';
+import { SessionAuthGuard } from 'src/auth/guards/session-auth.guard';
+import { Request } from 'express';
+import { PrivateUser } from './interfaces/private-user.interface';
 
 @Controller('users')
 export class UsersController {
@@ -33,6 +38,12 @@ export class UsersController {
       page,
       limit,
     });
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Get('/me')
+  async findMyself(@Req() req: Request): Promise<PrivateUser> {
+    return this.usersService.findPrivateUser((req.user as any).id);
   }
 
   @Get(':id')

@@ -1,9 +1,11 @@
 import { ForbiddenException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import * as session from 'express-session';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import * as passport from 'passport';
 import * as csurf from 'csurf';
 import { AppModule } from './app.module';
+import { PrismaClient } from '.prisma/client';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -32,7 +34,11 @@ async function bootstrap() {
       saveUninitialized: false,
       cookie: {
         secure: process.env.NODE_ENV !== 'development',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
       },
+      store: new PrismaSessionStore(new PrismaClient(), {
+        checkPeriod: 2 * 60 * 1000,
+      }),
     }),
   );
 

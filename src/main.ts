@@ -1,9 +1,10 @@
 import { ForbiddenException, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { NextFunction } from 'express';
 import * as session from 'express-session';
-import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import * as passport from 'passport';
 import * as csurf from 'csurf';
+import { PrismaSessionStore } from '@quixo3/prisma-session-store';
 import { AppModule } from './app.module';
 import { PrismaClient } from '.prisma/client';
 
@@ -43,7 +44,7 @@ async function bootstrap() {
   );
 
   app.use(csurf());
-  app.use((err: any, req: any, res: any, next: any) => {
+  app.use((err: any, _: never, __: never, next: NextFunction) => {
     if (err.code !== 'EBADCSRFTOKEN') return next(err);
     throw new ForbiddenException();
   });

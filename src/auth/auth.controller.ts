@@ -16,9 +16,4 @@ export class AuthController {
       csrfToken: req.csrfToken(),
     };
   }
-
-  @Get('/me')
-  async findMyself() {
-    return { message: 'hello' };
-  }
 }

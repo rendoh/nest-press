@@ -17,7 +17,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PublicUser } from './interfaces/public-user.interface';
 import { SessionAuthGuard } from 'src/auth/guards/session-auth.guard';
-import { Request } from 'express';
+import { AuthenticatedRequest } from 'express';
 import { PrivateUser } from './interfaces/private-user.interface';
 
 @Controller('users')
@@ -41,9 +41,9 @@ export class UsersController {
   }
 
   @UseGuards(SessionAuthGuard)
-  @Get('/me')
-  async findMyself(@Req() req: Request): Promise<PrivateUser> {
-    return this.usersService.findPrivateUser((req.user as any).id);
+  @Get('me')
+  async findMyself(@Req() req: AuthenticatedRequest): Promise<PrivateUser> {
+    return this.usersService.findPrivateUser(req.user.id);
   }
 
   @Get(':id')
@@ -51,13 +51,18 @@ export class UsersController {
     return this.usersService.findById(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.usersService.update(+id, updateUserDto);
+  @UseGuards(SessionAuthGuard)
+  @Patch('me')
+  update(
+    @Req() req: AuthenticatedRequest,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.usersService.update(req.user.id, updateUserDto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.usersService.delete(+id);
+  @UseGuards(SessionAuthGuard)
+  @Delete('me')
+  remove(@Req() req: AuthenticatedRequest) {
+    return this.usersService.delete(req.user.id);
   }
 }

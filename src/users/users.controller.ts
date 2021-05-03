@@ -16,18 +16,13 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PublicUser } from './interfaces/public-user.interface';
-import { SessionAuthGuard } from 'src/auth/guards/session-auth.guard';
+import { SessionAuthGuard } from '../auth/guards/session-auth.guard';
 import { AuthenticatedRequest } from 'express';
 import { PrivateUser } from './interfaces/private-user.interface';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.usersService.create(createUserDto);
-  }
 
   @Get()
   findAll(
@@ -40,10 +35,15 @@ export class UsersController {
     });
   }
 
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.usersService.create(createUserDto);
+  }
+
   @UseGuards(SessionAuthGuard)
   @Get('me')
   async findMyself(@Req() req: AuthenticatedRequest): Promise<PrivateUser> {
-    return this.usersService.findPrivateUser(req.user.id);
+    return this.usersService.findById(req.user.id, true);
   }
 
   @Get(':id')

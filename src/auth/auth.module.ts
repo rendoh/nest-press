@@ -2,8 +2,8 @@ import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { PrismaService } from 'src/prisma.service';
-import { UsersModule } from 'src/users/users.module';
+import { PrismaService } from '../prisma.service';
+import { UsersModule } from '../users/users.module';
 import { SessionSerializer } from './session.serializer';
 import { LocalStrategy } from './strategies/local.strategy';
 

@@ -5,6 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { hash } from 'bcrypt';
+import { Pagination } from '../types/pagination';
 import { PrismaService } from '../prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -15,7 +16,7 @@ import { PublicUser } from './interfaces/public-user.interface';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<PublicUser> {
     const { email, password, name } = createUserDto;
     const alreadyExist = await this.prisma.user.findUnique({
       where: {
@@ -36,6 +37,10 @@ export class UsersService {
         email,
         password: passwordHash,
       },
+      select: {
+        id: true,
+        name: true,
+      },
     });
   }
 
@@ -45,21 +50,34 @@ export class UsersService {
   }: {
     page?: number;
     limit?: number;
-  } = {}): Promise<PublicUser[]> {
-    return this.prisma.user.findMany({
-      skip: (page - 1) * limit,
-      take: limit,
-      select: {
-        id: true,
-        name: true,
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+  } = {}): Promise<Pagination<PublicUser>> {
+    const [count, data] = await this.prisma.$transaction([
+      this.prisma.user.count(),
+      this.prisma.user.findMany({
+        skip: (page - 1) * limit,
+        take: limit,
+        select: {
+          id: true,
+          name: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+    ]);
+
+    return {
+      count,
+      data,
+    };
   }
 
-  async findById(id: number): Promise<PublicUser> {
+  async findById(id: number, includeEmail: true): Promise<PrivateUser>;
+  async findById(id: number, includeEmail?: false): Promise<PublicUser>;
+  async findById(
+    id: number,
+    includeEmail = false,
+  ): Promise<PublicUser | PrivateUser> {
     const user = await this.prisma.user.findUnique({
       where: {
         id,
@@ -67,6 +85,7 @@ export class UsersService {
       select: {
         id: true,
         name: true,
+        email: includeEmail,
       },
     });
     if (!user) {
@@ -128,20 +147,5 @@ export class UsersService {
         id,
       },
     });
-  }
-
-  async findPrivateUser(id: number): Promise<PrivateUser> {
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-      },
-    });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
   }
 }

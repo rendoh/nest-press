@@ -1,4 +1,4 @@
-import { PublicUser } from 'src/users/interfaces/public-user.interface';
+import { PublicUser } from '../src/users/interfaces/public-user.interface';
 
 export {};
 

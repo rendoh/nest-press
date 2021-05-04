@@ -1,5 +1,5 @@
 import * as faker from 'faker';
-import { User } from '.prisma/client';
+import { User } from '@prisma/client';
 import { PublicUser } from '../interfaces/public-user.interface';
 import { PrivateUser } from '../interfaces/private-user.interface';
 

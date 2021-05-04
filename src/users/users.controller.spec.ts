@@ -51,7 +51,7 @@ describe('UsersController', () => {
 
   test('ユーザを作成できる', async () => {
     const createUserDto: CreateUserDto = {
-      email: faker.internet.email(),
+      email: faker.internet.exampleEmail(),
       name: faker.internet.userName(),
       password: faker.internet.password(),
     };
